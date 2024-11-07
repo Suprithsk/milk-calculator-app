@@ -115,8 +115,9 @@ const getMilkPurchaseAmountToday=async(req,res)=>{
         }
 
         const today = new Date();
-        const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-
+        today.setUTCHours(0, 0, 0, 0);
+        const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 2);
+        startOfMonth.setUTCHours(0, 0, 0, 0);
         const purchases = await Purchase.find({
             User: user._id,
             purchaseDate: {
@@ -146,8 +147,11 @@ const getAllMissedDates=async(req,res)=>{
         }
 
         const today = new Date();
-        today.setHours(0, 0, 0, 0); 
+        today.setUTCHours(0, 0, 0, 0);
+
         const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 2);
+        
+        startOfMonth.setUTCHours(0, 0, 0, 0);
 
         const purchases = await Purchase.find({
             User: user._id,
@@ -159,13 +163,12 @@ const getAllMissedDates=async(req,res)=>{
 
         const dates = purchases.map(purchase => {
             const date = new Date(purchase.purchaseDate);
-            date.setHours(0, 0, 0, 0);
+            date.setUTCHours(0, 0, 0, 0);
             return date;
         });
-
         const allDates = [];
-        for (let date = new Date(startOfMonth); date <= today; date.setDate(date.getDate() + 1)) {
-            date.setHours(0, 0, 0, 0);
+        for (let date = new Date(startOfMonth); date.getDate() <= today.getDate(); date.setDate(date.getDate() + 1)) {
+            date.setUTCHours(0, 0, 0, 0);
             if (!dates.some(d => d.getTime() === date.getTime())) {
                 allDates.push(new Date(date));
             }
@@ -184,12 +187,13 @@ const getMissedDatesOfThatMonth=async(req,res)=>{
             return res.status(400).send({ msg: "User not found" });
         }
 
-        const today = new Date();
         const month = parseInt(req.params.month) - 1;
         const year = parseInt(req.params.year);
-        const startOfMonth = new Date(year, month, 1);
-        const endOfTheMonth = new Date(year, month + 1, 0);
-
+        const startOfMonth = new Date(year, month, 2);
+        startOfMonth.setUTCHours(0, 0, 0, 0);
+        const endOfTheMonth = new Date(year, month + 1, 1);
+        endOfTheMonth.setUTCHours(0, 0, 0, 0);
+        console.log(endOfTheMonth);
         const purchases = await Purchase.find({
             User: user._id,
             purchaseDate: {
@@ -200,9 +204,10 @@ const getMissedDatesOfThatMonth=async(req,res)=>{
 
         const dates = purchases.map(purchase => purchase.purchaseDate);
         const allDates = [];
-        for (let date = startOfMonth; date <= endOfTheMonth; date.setDate(date.getDate() + 1)) {
-            if (!dates.includes(date)) {
-                allDates.push(date);
+        for (let date = new Date(startOfMonth); date <= endOfTheMonth; date.setDate(date.getDate() + 1)) {
+            date.setUTCHours(0, 0, 0, 0);
+            if (!dates.some(d => d.getTime() === date.getTime())) {
+                allDates.push(new Date(date));
             }
         }
 
@@ -219,11 +224,12 @@ const getPriceOfThatMonth=async(req,res)=>{
             return res.status(400).send({ msg: "User not found" });
         }
 
-        const today = new Date();
         const month = parseInt(req.params.month) - 1;
         const year = parseInt(req.params.year);
-        const startOfMonth = new Date(year, month, 1);
-        const endOfTheMonth = new Date(year, month + 1, 0);
+        const startOfMonth = new Date(year, month, 2);
+        startOfMonth.setUTCHours(0, 0, 0, 0);
+        const endOfTheMonth = new Date(year, month + 1, 1);
+        endOfTheMonth.setUTCHours(0, 0, 0, 0);
 
         const purchases = await Purchase.find({
             User: user._id,
@@ -238,7 +244,7 @@ const getPriceOfThatMonth=async(req,res)=>{
         res.status(200).send({
             totalAmount,
             startDate: startOfMonth,
-            endDate: today
+            endDate: endOfTheMonth
         });
     } catch (err) {
         console.log(err);

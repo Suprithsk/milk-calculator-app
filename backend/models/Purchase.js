@@ -24,7 +24,7 @@ const PurchaseSchema = new mongoose.Schema({
   curd: {
     curdId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Curd",
+      ref: "Curd", 
       required: true,
     },
     quantity: {

@@ -13,5 +13,5 @@ router.get("/getAllMissedDates", getAllMissedDates);
 router.get("/getMissedDatesOfThatMonth/:year/:month", getMissedDatesOfThatMonth);
 router.get("/getPriceOfThatMonth/:year/:month", getPriceOfThatMonth);
 
-
+ 
 module.exports = router;
