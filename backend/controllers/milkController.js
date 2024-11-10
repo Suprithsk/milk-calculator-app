@@ -64,18 +64,23 @@ const getCurd=async(req,res)=>{
     }
 }
 
+
 const purchaseMilkOrCurd=async(req,res)=>{
-    const {userId, milk, curd, purchasedDate }=req.body;
+    const { milk, curd, purchasedDate }=req.body;
     try{
-        const user=await User.findById(userId)
+        const user=await User.findOne({username: req.user.username});
         if(!user){
             return res.status(400).send({msg:"User not found"})
         }
-        const purchase = new Purchase({ User: userId, purchaseDate: purchasedDate });
+        const alreadyPurchase=await Purchase.findOne({User:user._id,purchaseDate:purchasedDate})
+        if(alreadyPurchase){
+            await Purchase.deleteOne({User:user._id,purchaseDate:purchasedDate})
+        }
+        const purchase = new Purchase({ User: user._id, purchaseDate: purchasedDate });
         let totalPrice = 0;
-
+ 
         if (milk) {
-            const milkPrice = await Milk.findOne({User: userId});
+            const milkPrice = await Milk.findOne({User: user._id});
             if(!milkPrice){
                 return res.status(400).send({msg:"Milk price not found"})
             }
@@ -84,7 +89,7 @@ const purchaseMilkOrCurd=async(req,res)=>{
         }
 
         if (curd) {
-            const curdPrice = await Curd.findOne({User: userId});
+            const curdPrice = await Curd.findOne({User: user._id});
             if(!curdPrice){
                 return res.status(400).send({msg:"Curd price not found"})
             }
@@ -95,7 +100,7 @@ const purchaseMilkOrCurd=async(req,res)=>{
         if (!milk && !curd) {
             return res.status(400).send({ msg: "Either milk or curd must be present in purchase" });
         }
-
+ 
         purchase.totalPriceOfPurchase = totalPrice;
         await purchase.save();
         res.status(201).send({ msg: "Purchase added successfully" });
@@ -193,7 +198,6 @@ const getMissedDatesOfThatMonth=async(req,res)=>{
         startOfMonth.setUTCHours(0, 0, 0, 0);
         const endOfTheMonth = new Date(year, month + 1, 1);
         endOfTheMonth.setUTCHours(0, 0, 0, 0);
-        console.log(endOfTheMonth);
         const purchases = await Purchase.find({
             User: user._id,
             purchaseDate: {
@@ -242,6 +246,7 @@ const getPriceOfThatMonth=async(req,res)=>{
         const totalAmount = purchases.reduce((sum, purchase) => sum + purchase.totalPriceOfPurchase, 0);
 
         res.status(200).send({
+            purchases,
             totalAmount,
             startDate: startOfMonth,
             endDate: endOfTheMonth

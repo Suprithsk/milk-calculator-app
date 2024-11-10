@@ -6,3 +6,13 @@ export const axiosInstance = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+export const axiosInstanceWithToken = (token) => {
+  return axios.create({
+    baseURL: import.meta.env.VITE_API_BASE_URL,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+  });
+}

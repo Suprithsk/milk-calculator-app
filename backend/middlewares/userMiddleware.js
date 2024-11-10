@@ -4,11 +4,12 @@ const jwtSecret = "SECRET";
 
 exports.userMiddleware=async(req,res,next)=>{
     let token=req.header('Authorization');
-    if(token.startsWith('Bearer ')){
-        token=token.slice(7,token.length).trimLeft();
-    }
+    console.log(token);
     if(!token){
         return res.status(401).send({msg:"Token not found"})
+    }
+    if(token.startsWith('Bearer ')){
+        token=token.slice(7,token.length).trimLeft();
     }
     try{
         const {username}=jwt.verify(token,jwtSecret)

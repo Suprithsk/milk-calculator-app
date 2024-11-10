@@ -7,7 +7,8 @@ export const signup = async (data) => {
         return response
     } catch (error) {
         console.log(error)
-        return error.response
+        throw error
+        // return error.response
     }
 }
 
@@ -16,6 +17,8 @@ export const signin = async (data) => {
         const response = await axiosInstance.post('/user/signin', data)
         return response
     } catch (error) {
-        return error.response
+        console.log(error)
+        throw error
+        // return error.response
     }
 }
