@@ -2,9 +2,8 @@ const User=require('../models/User');
 const jwt=require('jsonwebtoken');
 const jwtSecret = "SECRET";
 
-exports.userMiddleware=async(req,res,next)=>{
+exports.userMiddleware=async (req,res,next)=>{
     let token=req.header('Authorization');
-    console.log(token);
     if(!token){
         return res.status(401).send({msg:"Token not found"})
     }

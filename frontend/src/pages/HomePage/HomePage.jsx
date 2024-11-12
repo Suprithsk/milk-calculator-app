@@ -1,13 +1,17 @@
 import { useNavigate } from "react-router-dom"
-import { useEffect } from "react"
+import { useEffect,useState } from "react"
+import { Toaster, toast } from 'react-hot-toast';
+import styles from './HomePage.module.css'
+
 import Header from "../../components/Header/Header"
 import MilkForm from "../MilkForm/MilkForm"
 import { buyMilkOrCurd } from "../../apis/milkApi"
-import styles from './HomePage.module.css'
 import Analytics from "../Analytics/Analytics"
-import { Toaster, toast } from 'react-hot-toast';
 import TransactionsTable from "../TransactionsTable/TransactionsTable"
 import MissedDates from "../MissedDates/MissedDates"
+import { getAnalyticsData } from "../../apis/milkApi"
+import { getMissedDates } from "../../apis/milkApi";
+import Loader from "../../components/Loader/Loader";
 
 function HomePage() {
     const navigate = useNavigate()
@@ -16,8 +20,33 @@ function HomePage() {
             console.log('token not found')
             navigate('/signup')
         }
+    }, [navigate])
+    useEffect(() => {
+        refreshAnalyticsData();
+        refreshMissedDates();
     }, [])
-    
+    const [analyticsData, setAnalyticsData] = useState({ loading: true, data: null, error: null });
+    const [missedDates, setMissedDates] = useState({ loading: true, data: null, error: null });
+    const refreshAnalyticsData = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await getAnalyticsData(token);
+            setAnalyticsData({ loading: false, data: response, error: null });
+        } catch (e) {
+            console.error('Error in refreshAnalyticsData:', e);
+            setAnalyticsData({ loading: false, data: null, error: e });
+        }
+    }
+    const refreshMissedDates = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await getMissedDates(token);
+            setMissedDates({ loading: false, data: response, error: null });
+        } catch (e) {
+            console.error('Error in refreshMissedDates:', e);
+            setMissedDates({ loading: false, data: null, error: e });
+        }
+    }
     const handleAsyncOperation = async (milk, clearForm) => {
         try {
             await toast.promise(
@@ -55,11 +84,13 @@ function HomePage() {
             );
 
             console.log('API response:', response);
-            clearForm(); // Clear the form if the request is successful
-            return response; // Return the response to indicate success
+            clearForm();
+            refreshAnalyticsData();
+            refreshMissedDates();
+            return response; 
         } catch (e) {
             console.error('Error in buyMilkOrCurdFunc:', e);
-            throw e; // Ensure the error is propagated
+            throw e; 
         }
     };
 
@@ -69,11 +100,24 @@ function HomePage() {
             <Header />
             <MilkForm propsBuyMilkOrCurd={handleAsyncOperation} />
             <div className={styles.second_div}>
-                <Analytics />
-                <TransactionsTable />
+                {analyticsData.loading && !analyticsData.error && <Loader />}
+                {analyticsData.error && <div>Error: {`Error displaying results`}</div>}
+                {!analyticsData.loading && analyticsData.data && 
+                    <>
+                        <Analytics analyticsData={analyticsData.data}/>
+                        <TransactionsTable analyticsData={analyticsData.data}/>
+                    </>
+                }
             </div>
             <div className={styles.second_div}>
-                <MissedDates />
+                {missedDates.loading && !missedDates.error && <Loader />}
+                {missedDates.error && <div>Error: {`Error displaying results`}</div>}
+                {!missedDates.loading && missedDates.data && 
+                    <>
+                        <MissedDates missedDates={missedDates.data}/>
+                    </>
+                }
+                {/* <MissedDates missedDates={missedDates}/> */}
             </div>
         </div>
     )

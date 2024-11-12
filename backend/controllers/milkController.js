@@ -27,6 +27,7 @@ const addCurd=async(req,res)=>{
         if(!user){
             return res.status(400).send({msg:"User not found"})
         }
+        await Curd.deleteOne({User:user._id})
         const curd=new Curd({price,User:user._id})
         await curd.save();
         res.status(201).send({msg:"Curd added successfully"})
@@ -43,6 +44,9 @@ const getMilk=async(req,res)=>{
             return res.status(400).send({msg:"User not found"})
         }
         const milk=await Milk.find({User:user._id}).populate('User')
+        if(!milk){
+            return res.status(400).send({msg:"Milk price not found"})
+        }
         res.status(200).send(milk)
     }catch(err){
         console.log(err);
@@ -57,6 +61,9 @@ const getCurd=async(req,res)=>{
             return res.status(400).send({msg:"User not found"})
         }
         const curd=await Curd.find({User:user._id}).populate('User')
+        if(!curd){
+            return res.status(400).send({msg:"Curd price not found"})
+        }
         res.status(200).send(curd)
     }catch(err){
         console.log(err);
@@ -129,7 +136,7 @@ const getMilkPurchaseAmountToday=async(req,res)=>{
                 $gte: startOfMonth,
                 $lte: today
             }
-        }).populate('milk.milkId curd.curdId');
+        }); 
 
         const totalAmount = purchases.reduce((sum, purchase) => sum + purchase.totalPriceOfPurchase, 0);
 

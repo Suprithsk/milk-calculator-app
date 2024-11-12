@@ -23,6 +23,7 @@ const signup = async (req, res) => {
       res.status(500).send({ msg: "Server error" });
     }
   }
+  // ["Autorize"]
 const signin = async (req, res) => {
     const { username, password } = req.body;
     try {
