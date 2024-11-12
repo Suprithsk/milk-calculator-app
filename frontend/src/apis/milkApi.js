@@ -13,12 +13,37 @@ export const buyMilkOrCurd = async (milk, token) => {
         throw error
     }
 }
+export const getAnalyticsDataOfThatMonth = async (token, month, year) => {
+    try {
+        if(!token) {
+            throw new Error('Token not found')
+        }
+        const response = await axiosInstanceWithToken(token).get(`/milk/getPriceOfThatMonth/${year}/${month}`)
+        return response.data
+    } catch (error) {
+        console.log(error)
+        throw error
+    }
+}
+
 export const getAnalyticsData = async (token) => {
     try {
         if(!token) {
             throw new Error('Token not found')
         }
         const response = await axiosInstanceWithToken(token).get('/milk/getMilkPurchaseAmountToday')
+        return response.data
+    } catch (error) {
+        console.log(error)
+        throw error
+    }
+}
+export const getMissedDatesOfThatMonth = async (token, month, year) => {
+    try {
+        if(!token) {
+            throw new Error('Token not found')
+        }
+        const response = await axiosInstanceWithToken(token).get(`/milk/getMissedDatesOfThatMonth/${year}/${month}`)
         return response.data
     } catch (error) {
         console.log(error)

@@ -203,7 +203,13 @@ const getMissedDatesOfThatMonth=async(req,res)=>{
         const year = parseInt(req.params.year);
         const startOfMonth = new Date(year, month, 2);
         startOfMonth.setUTCHours(0, 0, 0, 0);
-        const endOfTheMonth = new Date(year, month + 1, 1);
+        let endOfTheMonth;
+        if(Number(req.params.month)===new Date().getMonth()+1){
+            endOfTheMonth=new Date();
+        }else{
+            endOfTheMonth = new Date(year, month + 1, 1);
+        }
+        // endOfTheMonth = new Date(year, month + 1, 1);
         endOfTheMonth.setUTCHours(0, 0, 0, 0);
         const purchases = await Purchase.find({
             User: user._id,
@@ -248,7 +254,7 @@ const getPriceOfThatMonth=async(req,res)=>{
                 $gte: startOfMonth,
                 $lte: endOfTheMonth
             }
-        }).populate('milk.milkId curd.curdId');
+        });
 
         const totalAmount = purchases.reduce((sum, purchase) => sum + purchase.totalPriceOfPurchase, 0);
 
